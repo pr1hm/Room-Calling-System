@@ -23,7 +23,7 @@ public class ServerActivity extends AppCompatActivity {
         db.addRoom("101", "Room 101 - Test Patient", "Ward A");
 
         // Start WebSocket Server first
-        webSocketServer = new RoomWebSocketServer();
+        webSocketServer = new RoomWebSocketServer(db);
         webSocketServer.start();
         Log.d("WS_SERVER", "Attempting to start WebSocket Server on port 8090...");
 
