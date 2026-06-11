@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Controls</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
+        button { display: block; width: 100%; padding: 20px; margin: 10px 0; font-size: 18px; border: none; border-radius: 8px; color: white; font-weight: bold; }
+        .btn-call { background-color: #ffc107; color: black; }
+        .btn-assist { background-color: #fd7e14; }
+        .btn-care { background-color: #dc3545; }
+        .btn-emergency { background-color: #8b0000; font-size: 22px; text-transform: uppercase; }
+        .btn-resolved { background-color: #28a745; margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+<h2>Room Controls</h2>
+<p>Select your required assistance level below.</p>
+
+<button class="btn-call" onclick="sendStatus(1)">Call Nurse</button>
+<button class="btn-assist" onclick="sendStatus(2)">Need Assistance</button>
+<button class="btn-care" onclick="sendStatus(3)">Care Required</button>
+<button class="btn-emergency" onclick="sendStatus(4)">EMERGENCY</button>
+
+<button class="btn-resolved" onclick="sendStatus(0)">Mark as Resolved (I'm OK)</button>
+
+<script>
+    function sendStatus(statusCode) {
+        const payload = {
+            roomId: "101",
+            status: statusCode
+        };
+
+        fetch('/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (response.ok) alert("Status updated successfully.");
+            else alert("Failed to update status.");
+        })
+        .catch(err => alert("Network error: " + err));
+    }
+</script>
+</body>
+</html>

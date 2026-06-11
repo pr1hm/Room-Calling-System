@@ -81,4 +81,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return rooms;
     }
+    // UPDATE room status
+    public boolean updateStatus(String roomId, int status) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(COL_STATUS, status);
+        values.put(COL_LAST_UPDATED, getCurrentTimestamp());
+
+        // Update the row where the room_id matches our requested ID
+        int rows = db.update(TABLE_ROOMS, values, COL_ROOM_ID + "=?", new String[]{roomId});
+
+        // If rows > 0, the update was successful
+        return rows > 0;
+    }
 }
