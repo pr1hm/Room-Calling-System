@@ -1,4 +1,4 @@
-package com.yourname.roomcalling.model;
+package com.pratham.roomcalling.model;
 
 public class Room {
     private String roomId;

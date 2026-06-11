@@ -1,11 +1,11 @@
-package com.yourname.roomcalling.db;
+package com.pratham.roomcalling.db;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import com.yourname.roomcalling.model.Room;
+import com.pratham.roomcalling.model.Room;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;

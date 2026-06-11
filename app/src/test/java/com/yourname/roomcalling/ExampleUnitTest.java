@@ -1,4 +1,4 @@
-package com.yourname.roomcalling;
+package com.pratham.roomcalling;
 
 import org.junit.Test;
 
