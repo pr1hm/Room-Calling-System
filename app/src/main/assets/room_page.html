@@ -16,7 +16,7 @@
 </head>
 <body>
 
-<h2>Room Controls</h2>
+<h2>Room {{ROOM_ID}} Controls</h2>
 <p>Select your required assistance level below.</p>
 
 <button class="btn-call" onclick="sendStatus(1)">Call Nurse</button>
@@ -29,7 +29,7 @@
 <script>
     function sendStatus(statusCode) {
         const payload = {
-            roomId: "101",
+            roomId: "{{ROOM_ID}}",
             status: statusCode
         };
 
