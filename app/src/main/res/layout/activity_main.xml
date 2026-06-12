@@ -4,34 +4,60 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="32dp">
+    android:padding="32dp"
+    android:background="#F8FAFC">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Room Calling System"
-        android:textSize="24sp"
+        android:text="System Setup"
+        android:textSize="32sp"
         android:textStyle="bold"
+        android:textColor="#1E293B"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select the operating mode for this device. This choice will be saved."
+        android:textSize="16sp"
+        android:textColor="#64748B"
+        android:textAlignment="center"
         android:layout_marginBottom="48dp" />
 
     <Button
-        android:id="@+id/btnServer"
+        android:id="@+id/btnModeServer"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="I am the SERVER"
-        android:layout_marginBottom="16dp" />
+        android:layout_height="75dp"
+        android:backgroundTint="#0F172A"
+        android:textColor="#FFFFFF"
+        android:text="SERVER NODE\n(Background Database)"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:elevation="4dp"
+        android:layout_marginBottom="16dp"/>
 
     <Button
-        android:id="@+id/btnClient"
+        android:id="@+id/btnModeClient"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="I am a CLIENT (Nurse Station)"
-        android:layout_marginBottom="16dp" />
+        android:layout_height="75dp"
+        android:backgroundTint="#0F172A"
+        android:textColor="#FFFFFF"
+        android:text="NURSE STATION\n(Local Ward Monitor)"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:elevation="4dp"
+        android:layout_marginBottom="16dp"/>
 
     <Button
-        android:id="@+id/btnMaster"
+        android:id="@+id/btnModeMaster"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="I am a MASTER (Supervisor)" />
+        android:layout_height="75dp"
+        android:backgroundTint="#0F172A"
+        android:textColor="#FFFFFF"
+        android:text="SUPERVISOR MASTER\n(Global Facility Monitor)"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:elevation="4dp"/>
 
 </LinearLayout>

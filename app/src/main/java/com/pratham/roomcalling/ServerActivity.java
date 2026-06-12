@@ -12,8 +12,11 @@ public class ServerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_server);
+
+
 
         // UI Kill Switch
         Button btnStopServer = findViewById(R.id.btnStopServer);

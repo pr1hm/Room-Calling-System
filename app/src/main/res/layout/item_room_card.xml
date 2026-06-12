@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Room 101"
-            android:textSize="22sp"
+            android:textSize="26sp"
             android:textStyle="bold"
             android:textColor="#1E293B"/>
 
@@ -31,17 +31,25 @@
             android:text="Ward A"
             android:textSize="14sp"
             android:textColor="#64748B"
+            android:textStyle="bold"
             android:layout_marginTop="2dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#1A000000"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"/>
 
         <TextView
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="IDLE"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:letterSpacing="0.05"
-            android:layout_marginTop="16dp"/>
+            android:letterSpacing="0.08"
+            android:textColor="#1E293B"/>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

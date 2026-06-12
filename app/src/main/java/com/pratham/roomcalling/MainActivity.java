@@ -9,59 +9,54 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "RoomCallingPrefs";
-    private static final String KEY_ROLE = "DeviceRole";
+    private static final String KEY_MODE = "DeviceMode";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 1. Check if a role is already saved
+        // Check if a mode was already selected previously
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        String savedRole = prefs.getString(KEY_ROLE, null);
+        String savedMode = prefs.getString(KEY_MODE, null);
 
-        if (savedRole != null) {
-            // Role exists, launch directly into that Activity
-            launchRoleActivity(savedRole);
-            return; // Stop running the rest of onCreate
+        if (savedMode != null) {
+            launchMode(savedMode);
+            return; // Skip loading the UI entirely
         }
 
-        // 2. If no role is saved, show the selection screen
         setContentView(R.layout.activity_main);
 
-        Button btnServer = findViewById(R.id.btnServer);
-        Button btnClient = findViewById(R.id.btnClient);
-        Button btnMaster = findViewById(R.id.btnMaster);
+        // Bind to the NEW IDs from the updated activity_main.xml
+        Button btnModeServer = findViewById(R.id.btnModeServer);
+        Button btnModeClient = findViewById(R.id.btnModeClient);
+        Button btnModeMaster = findViewById(R.id.btnModeMaster);
 
-        btnServer.setOnClickListener(v -> saveRoleAndLaunch("SERVER"));
-        btnClient.setOnClickListener(v -> saveRoleAndLaunch("CLIENT"));
-        btnMaster.setOnClickListener(v -> saveRoleAndLaunch("MASTER"));
+        btnModeServer.setOnClickListener(v -> saveAndLaunch("SERVER"));
+        btnModeClient.setOnClickListener(v -> saveAndLaunch("CLIENT"));
+        btnModeMaster.setOnClickListener(v -> saveAndLaunch("MASTER"));
     }
 
-    private void saveRoleAndLaunch(String role) {
-        // Save the choice
+    private void saveAndLaunch(String mode) {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        prefs.edit().putString(KEY_ROLE, role).apply();
-
-        // Launch the activity
-        launchRoleActivity(role);
+        prefs.edit().putString(KEY_MODE, mode).apply();
+        launchMode(mode);
     }
 
-    private void launchRoleActivity(String role) {
+    private void launchMode(String mode) {
         Intent intent;
-        switch (role) {
+        switch (mode) {
             case "SERVER":
                 intent = new Intent(this, ServerActivity.class);
-                break;
-            case "CLIENT":
-                intent = new Intent(this, ClientActivity.class);
                 break;
             case "MASTER":
                 intent = new Intent(this, MasterActivity.class);
                 break;
+            case "CLIENT":
             default:
-                return;
+                intent = new Intent(this, ClientActivity.class);
+                break;
         }
         startActivity(intent);
-        finish(); // Close MainActivity so the user can't press 'Back' to return to it
+        finish(); // Close MainActivity so the user can't use the back button to return here
     }
 }
