@@ -17,22 +17,24 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.pratham.roomcalling.adapter.RoomAdapter;
 import com.pratham.roomcalling.model.Room;
-import com.pratham.roomcalling.websocket.RoomWebSocketClient;
 import com.pratham.roomcalling.util.RoomAudioManager;
+import com.pratham.roomcalling.websocket.RoomWebSocketClient;
 
 import java.lang.reflect.Type;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ClientActivity extends AppCompatActivity {
 
     private RoomWebSocketClient wsClient;
-    private RoomAudioManager audioManager;
-    private EditText etServerIp;
+    private EditText etServerIp, etStationName; // Added etStationName
     private LinearLayout layoutLogin, layoutGrid;
     private RecyclerView recyclerViewRooms;
     private RoomAdapter roomAdapter;
+    private RoomAudioManager audioManager;
     private Gson gson;
+    private String targetStation = ""; // Holds the user's ward choice
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,12 +46,13 @@ public class ClientActivity extends AppCompatActivity {
 
         // UI References
         etServerIp = findViewById(R.id.etServerIp);
+        etStationName = findViewById(R.id.etStationName); // Initialize new input
         Button btnConnect = findViewById(R.id.btnConnect);
         layoutLogin = findViewById(R.id.layoutLogin);
         layoutGrid = findViewById(R.id.layoutGrid);
         recyclerViewRooms = findViewById(R.id.recyclerViewRooms);
 
-        // Setup Grid (2 columns)
+        // Setup Grid
         recyclerViewRooms.setLayoutManager(new GridLayoutManager(this, 2));
         roomAdapter = new RoomAdapter();
         recyclerViewRooms.setAdapter(roomAdapter);
@@ -59,8 +62,10 @@ public class ClientActivity extends AppCompatActivity {
 
     private void connectToServer() {
         String ipAddress = etServerIp.getText().toString().trim();
-        if (ipAddress.isEmpty()) {
-            Toast.makeText(this, "Please enter an IP address", Toast.LENGTH_SHORT).show();
+        targetStation = etStationName.getText().toString().trim();
+
+        if (ipAddress.isEmpty() || targetStation.isEmpty()) {
+            Toast.makeText(this, "Please enter both IP and Station Name", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -68,18 +73,15 @@ public class ClientActivity extends AppCompatActivity {
             URI uri = new URI("ws://" + ipAddress + ":8090");
             wsClient = new RoomWebSocketClient(uri);
 
-            // Listen for incoming messages AND connection events
             wsClient.setWebSocketListener(new RoomWebSocketClient.WebSocketListener() {
-
                 @Override
                 public void onConnected() {
-                    // Must run on UI thread because it's coming from a background network thread
                     runOnUiThread(() -> Toast.makeText(ClientActivity.this, "Successfully Connected!", Toast.LENGTH_SHORT).show());
                 }
 
                 @Override
                 public void onDisconnected(String reason) {
-                    runOnUiThread(() -> Toast.makeText(ClientActivity.this, "Connection Lost/Failed: " + reason, Toast.LENGTH_LONG).show());
+                    runOnUiThread(() -> Toast.makeText(ClientActivity.this, "Connection Failed: " + reason, Toast.LENGTH_LONG).show());
                 }
 
                 @Override
@@ -88,23 +90,28 @@ public class ClientActivity extends AppCompatActivity {
                         JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
                         String action = jsonObject.get("action").getAsString();
 
-                        // If it's our REFRESH_ALL payload
                         if ("REFRESH_ALL".equals(action)) {
                             JsonArray dataArray = jsonObject.getAsJsonArray("data");
                             Type listType = new TypeToken<List<Room>>(){}.getType();
-                            List<Room> parsedRooms = gson.fromJson(dataArray, listType);
+                            List<Room> allRooms = gson.fromJson(dataArray, listType);
 
-                            // CRITICAL: Move back to the Main Thread to update the UI
+                            // --- NEW: FILTER THE DATA ---
+                            List<Room> myStationRooms = new ArrayList<>();
+                            for (Room room : allRooms) {
+                                // Ignore case (e.g. "Ward A" matches "ward a")
+                                if (room.getStationName().equalsIgnoreCase(targetStation)) {
+                                    myStationRooms.add(room);
+                                }
+                            }
+                            // ----------------------------
+
                             runOnUiThread(() -> {
-                                // Hide login, show grid
                                 layoutLogin.setVisibility(View.GONE);
                                 layoutGrid.setVisibility(View.VISIBLE);
 
-                                // Update the visual cards
-                                roomAdapter.updateRooms(parsedRooms);
-
-                                // Trigger the Audio Engine
-                                audioManager.evaluateAndPlay(parsedRooms);
+                                // Only pass the filtered rooms to the UI and Audio Engine
+                                roomAdapter.updateRooms(myStationRooms);
+                                audioManager.evaluateAndPlay(myStationRooms);
                             });
                         }
                     } catch (Exception e) {
@@ -114,7 +121,6 @@ public class ClientActivity extends AppCompatActivity {
             });
 
             wsClient.connect();
-            Toast.makeText(this, "Connecting...", Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
             Log.e("CLIENT_TEST", "Invalid URI", e);
@@ -128,7 +134,6 @@ public class ClientActivity extends AppCompatActivity {
         if (wsClient != null && wsClient.isOpen()) {
             wsClient.close();
         }
-        // Stop audio when app closes
         if (audioManager != null) {
             audioManager.stopAudio();
         }
