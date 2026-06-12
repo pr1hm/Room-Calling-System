@@ -1,67 +1,295 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<!--
+  GLASS THEME SYSTEM
+  ==================
+  Background:     #070D1A  (deep navy)
+  Surface:        #FFFFFF08 (glass panel — 3% white alpha)
+  Surface border: #FFFFFF14 (hairline — 8% white alpha)
+  Accent:         #63B3ED  (cool blue)
+  Accent tint:    #63B3ED22 (field focus / tint fills)
+  Text primary:   #EDF2F7
+  Text secondary: #94A3B8
+  Text muted:     #4A5568
+
+  All elevation achieved through border opacity, never shadows.
+-->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:background="#070D1A">
 
+    <!-- ── Ambient orb top-right ── -->
+    <View
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="-80dp"
+        android:layout_marginEnd="-80dp"
+        android:background="@drawable/bg_orb_blue" />
+
+    <!-- ── Ambient orb bottom-left ── -->
+    <View
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="-60dp"
+        android:layout_marginStart="-60dp"
+        android:background="@drawable/bg_orb_purple" />
+
+    <!-- ════════════════════════════
+         LOGIN PANEL
+         ════════════════════════════ -->
     <LinearLayout
         android:id="@+id/layoutLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_centerInParent="true"
-        android:gravity="center_horizontal">
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingHorizontal="24dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nurse Station"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp" />
-
-        <EditText
-            android:id="@+id/etServerIp"
+        <!-- Glass card -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter Server IP"
-            android:inputType="textUri"
-            android:layout_marginBottom="16dp"/>
+            android:orientation="vertical"
+            android:background="@drawable/bg_glass_card"
+            android:padding="28dp">
 
-        <EditText
-            android:id="@+id/etStationName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Your Station (e.g., Ward A)"
-            android:inputType="text"
-            android:layout_marginBottom="16dp"/>
+            <!-- Status badge -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_badge_blue"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="0dp"
+                android:layout_marginBottom="20dp">
 
-        <Button
-            android:id="@+id/btnConnect"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Connect" />
+                <View
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/bg_dot_blue"
+                    android:layout_marginEnd="7dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="WARD MONITORING"
+                    android:textSize="10sp"
+                    android:textColor="#63B3ED"
+                    android:letterSpacing="0.08"
+                    android:textAllCaps="true" />
+            </LinearLayout>
+
+            <!-- Heading -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nurse Station"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:textColor="#EDF2F7"
+                android:letterSpacing="-0.02"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connect to your hospital network"
+                android:textSize="13sp"
+                android:textColor="#4A5568"
+                android:layout_marginBottom="28dp" />
+
+            <!-- Field: Server IP -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SERVER IP"
+                android:textSize="10sp"
+                android:textColor="#4A5568"
+                android:letterSpacing="0.08"
+                android:textAllCaps="true"
+                android:layout_marginBottom="6dp" />
+
+            <EditText
+                android:id="@+id/etServerIp"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:hint="192.168.x.x"
+                android:inputType="textUri"
+                android:background="@drawable/bg_glass_field"
+                android:paddingHorizontal="16dp"
+                android:textColor="#EDF2F7"
+                android:textColorHint="#4A5568"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Field: Station Name -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="STATION ID"
+                android:textSize="10sp"
+                android:textColor="#4A5568"
+                android:letterSpacing="0.08"
+                android:textAllCaps="true"
+                android:layout_marginBottom="6dp" />
+
+            <EditText
+                android:id="@+id/etStationName"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:hint="Ward A, ICU, etc."
+                android:inputType="text"
+                android:background="@drawable/bg_glass_field"
+                android:paddingHorizontal="16dp"
+                android:textColor="#EDF2F7"
+                android:textColorHint="#4A5568"
+                android:textSize="14sp"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Divider rule -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="18dp">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"
+                    android:background="#FFFFFF0F" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  secure channel  "
+                    android:textSize="10sp"
+                    android:textColor="#2D3748"
+                    android:letterSpacing="0.05" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"
+                    android:background="#FFFFFF0F" />
+            </LinearLayout>
+
+            <!-- Connect button -->
+            <Button
+                android:id="@+id/btnConnect"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Connect"
+                android:textColor="#E2F0FB"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:letterSpacing="0.04"
+                android:background="@drawable/bg_btn_glass"
+                android:elevation="0dp" />
+
+            <!-- Footer hint -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="v2.4  ·  Encrypted  ·  Local Network"
+                android:textSize="10sp"
+                android:textColor="#2D3748"
+                android:layout_marginTop="16dp" />
+
+        </LinearLayout>
     </LinearLayout>
 
+    <!-- ════════════════════════════
+         DASHBOARD / GRID PANEL
+         ════════════════════════════ -->
     <LinearLayout
         android:id="@+id/layoutGrid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="52dp"
         android:visibility="gone">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Top bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Live Room Status"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
 
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MY STATION"
+                    android:textSize="10sp"
+                    android:textColor="#4A5568"
+                    android:letterSpacing="0.08"
+                    android:textAllCaps="true"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Live Status"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#EDF2F7" />
+            </LinearLayout>
+
+            <!-- Live indicator -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_badge_blue"
+                android:paddingHorizontal="10dp">
+
+                <View
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/bg_dot_blue"
+                    android:layout_marginEnd="6dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LIVE"
+                    android:textSize="10sp"
+                    android:textColor="#63B3ED"
+                    android:letterSpacing="0.1"
+                    android:textAllCaps="true" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Room grid -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewRooms"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="24dp" />
+
     </LinearLayout>
 
 </RelativeLayout>

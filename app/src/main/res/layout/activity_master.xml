@@ -1,10 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MasterActivity">
+    android:padding="16dp"
+    android:background="#F8FAFC">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/layoutLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Supervisor Login"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#1E293B"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Global Facility Monitor"
+            android:textSize="16sp"
+            android:textColor="#64748B"
+            android:layout_marginBottom="24dp" />
+
+        <EditText
+            android:id="@+id/etServerIp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="Enter Main Server IP"
+            android:inputType="textUri"
+            android:background="#FFFFFF"
+            android:padding="16dp"
+            android:elevation="2dp"
+            android:layout_marginBottom="24dp"/>
+
+        <Button
+            android:id="@+id/btnConnect"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:backgroundTint="#0F172A"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:text="Connect to Network" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutGrid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Active Facility Status"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#1E293B"
+            android:layout_marginBottom="16dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewRooms"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+</RelativeLayout>
