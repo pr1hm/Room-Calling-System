@@ -13,12 +13,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.pratham.roomcalling.adapter.RoomAdapter;
 import com.pratham.roomcalling.model.Room;
 import com.pratham.roomcalling.websocket.RoomWebSocketClient;
+import com.pratham.roomcalling.util.RoomAudioManager;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -27,6 +27,7 @@ import java.util.List;
 public class ClientActivity extends AppCompatActivity {
 
     private RoomWebSocketClient wsClient;
+    private RoomAudioManager audioManager;
     private EditText etServerIp;
     private LinearLayout layoutLogin, layoutGrid;
     private RecyclerView recyclerViewRooms;
@@ -39,6 +40,7 @@ public class ClientActivity extends AppCompatActivity {
         setContentView(R.layout.activity_client);
 
         gson = new Gson();
+        audioManager = new RoomAudioManager(this);
 
         // UI References
         etServerIp = findViewById(R.id.etServerIp);
@@ -66,30 +68,48 @@ public class ClientActivity extends AppCompatActivity {
             URI uri = new URI("ws://" + ipAddress + ":8090");
             wsClient = new RoomWebSocketClient(uri);
 
-            // Listen for incoming messages
-            wsClient.setMessageListener(message -> {
-                try {
-                    JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
-                    String action = jsonObject.get("action").getAsString();
+            // Listen for incoming messages AND connection events
+            wsClient.setWebSocketListener(new RoomWebSocketClient.WebSocketListener() {
 
-                    // If it's our REFRESH_ALL payload
-                    if ("REFRESH_ALL".equals(action)) {
-                        JsonArray dataArray = jsonObject.getAsJsonArray("data");
-                        Type listType = new TypeToken<List<Room>>(){}.getType();
-                        List<Room> parsedRooms = gson.fromJson(dataArray, listType);
+                @Override
+                public void onConnected() {
+                    // Must run on UI thread because it's coming from a background network thread
+                    runOnUiThread(() -> Toast.makeText(ClientActivity.this, "Successfully Connected!", Toast.LENGTH_SHORT).show());
+                }
 
-                        // CRITICAL: Move back to the Main Thread to update the UI
-                        runOnUiThread(() -> {
-                            // Hide login, show grid
-                            layoutLogin.setVisibility(View.GONE);
-                            layoutGrid.setVisibility(View.VISIBLE);
+                @Override
+                public void onDisconnected(String reason) {
+                    runOnUiThread(() -> Toast.makeText(ClientActivity.this, "Connection Lost/Failed: " + reason, Toast.LENGTH_LONG).show());
+                }
 
-                            // Update the visual cards
-                            roomAdapter.updateRooms(parsedRooms);
-                        });
+                @Override
+                public void onMessageReceived(String message) {
+                    try {
+                        JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
+                        String action = jsonObject.get("action").getAsString();
+
+                        // If it's our REFRESH_ALL payload
+                        if ("REFRESH_ALL".equals(action)) {
+                            JsonArray dataArray = jsonObject.getAsJsonArray("data");
+                            Type listType = new TypeToken<List<Room>>(){}.getType();
+                            List<Room> parsedRooms = gson.fromJson(dataArray, listType);
+
+                            // CRITICAL: Move back to the Main Thread to update the UI
+                            runOnUiThread(() -> {
+                                // Hide login, show grid
+                                layoutLogin.setVisibility(View.GONE);
+                                layoutGrid.setVisibility(View.VISIBLE);
+
+                                // Update the visual cards
+                                roomAdapter.updateRooms(parsedRooms);
+
+                                // Trigger the Audio Engine
+                                audioManager.evaluateAndPlay(parsedRooms);
+                            });
+                        }
+                    } catch (Exception e) {
+                        Log.e("CLIENT_TEST", "Error parsing message", e);
                     }
-                } catch (Exception e) {
-                    Log.e("CLIENT_TEST", "Error parsing message", e);
                 }
             });
 
@@ -107,6 +127,10 @@ public class ClientActivity extends AppCompatActivity {
         super.onDestroy();
         if (wsClient != null && wsClient.isOpen()) {
             wsClient.close();
+        }
+        // Stop audio when app closes
+        if (audioManager != null) {
+            audioManager.stopAudio();
         }
     }
 }

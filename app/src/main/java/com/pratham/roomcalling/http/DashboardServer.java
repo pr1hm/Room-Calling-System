@@ -3,6 +3,7 @@ package com.pratham.roomcalling.http;
 import android.content.Context;
 import android.util.Log;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.pratham.roomcalling.db.DatabaseHelper;
 import com.pratham.roomcalling.model.Room;
 import com.pratham.roomcalling.websocket.RoomWebSocketServer;
@@ -33,15 +34,36 @@ public class DashboardServer extends NanoHTTPD {
         String uri = session.getUri();
 
         // 1. Serve the Patient Room Page
-        if (Method.GET.equals(method) && uri.startsWith("/room/") && !uri.equals("/room/add")) {
+        if (Method.GET.equals(method) && uri.startsWith("/room/")) {
             try {
+                // Extract the room ID from the URL (e.g., "/room/105" becomes "105")
                 String requestedRoomId = uri.substring("/room/".length());
+
+                // Verify the room exists in the database
+                Room room = dbHelper.getRoomById(requestedRoomId);
+                if (room == null) {
+                    // Room doesn't exist! Serve an error page instead.
+                    String errorHtml = "<html><body style='font-family: sans-serif; text-align: center; padding: 50px;'>" +
+                            "<h1 style='color: #d32f2f;'>Error 404</h1>" +
+                            "<h2>Room " + requestedRoomId + " Not Found</h2>" +
+                            "<p>This room has not been created in the system yet.</p>" +
+                            "<p>Please contact the administrator to add it via the Dashboard.</p>" +
+                            "</body></html>";
+                    return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/html", errorHtml);
+                }
+
+                // If we get here, the room exists. Read the raw HTML file from assets.
                 InputStream is = context.getAssets().open("room_page.html");
                 java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
                 String htmlTemplate = s.hasNext() ? s.next() : "";
                 is.close();
+
+                // Inject the dynamic Room ID into the HTML
                 String finalHtml = htmlTemplate.replace("{{ROOM_ID}}", requestedRoomId);
+
+                // Send the customized HTML back to the browser
                 return newFixedLengthResponse(Response.Status.OK, "text/html", finalHtml);
+
             } catch (Exception e) {
                 return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Could not load page.");
             }
@@ -55,9 +77,10 @@ public class DashboardServer extends NanoHTTPD {
                 session.getInputStream().read(buffer, 0, contentLength);
                 String jsonBody = new String(buffer);
 
-                Map<String, Object> requestData = gson.fromJson(jsonBody, Map.class);
-                String roomId = (String) requestData.get("roomId");
-                int status = ((Double) requestData.get("status")).intValue();
+                // Safely parse JSON
+                JsonObject requestData = gson.fromJson(jsonBody, JsonObject.class);
+                String roomId = requestData.get("roomId").getAsString();
+                int status = requestData.get("status").getAsInt();
 
                 boolean success = dbHelper.updateStatus(roomId, status);
 
@@ -66,7 +89,6 @@ public class DashboardServer extends NanoHTTPD {
                     List<Room> allRooms = dbHelper.getAllRooms();
                     Map<String, Object> payload = new HashMap<>();
                     payload.put("action", "REFRESH_ALL");
-                    payload.put("station", "Ward A");
                     payload.put("data", allRooms);
 
                     if (wsServer != null) {
@@ -102,10 +124,11 @@ public class DashboardServer extends NanoHTTPD {
                 session.getInputStream().read(buffer, 0, contentLength);
                 String jsonBody = new String(buffer);
 
-                Map<String, String> requestData = gson.fromJson(jsonBody, Map.class);
-                String newRoomId = requestData.get("roomId");
-                String newRoomName = requestData.get("roomName");
-                String newStationName = requestData.get("stationName");
+                // Safely parse JSON
+                JsonObject requestData = gson.fromJson(jsonBody, JsonObject.class);
+                String newRoomId = requestData.get("roomId").getAsString();
+                String newRoomName = requestData.get("roomName").getAsString();
+                String newStationName = requestData.get("stationName").getAsString();
 
                 boolean success = dbHelper.addRoom(newRoomId, newRoomName, newStationName);
 
@@ -114,7 +137,6 @@ public class DashboardServer extends NanoHTTPD {
                     List<Room> allRooms = dbHelper.getAllRooms();
                     Map<String, Object> payload = new HashMap<>();
                     payload.put("action", "REFRESH_ALL");
-                    payload.put("station", "Ward A");
                     payload.put("data", allRooms);
 
                     if (wsServer != null) {
@@ -127,6 +149,42 @@ public class DashboardServer extends NanoHTTPD {
 
             } catch (Exception e) {
                 Log.e("HTTP_TEST", "Error adding room", e);
+                return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "application/json", "{\"error\":\"" + e.getMessage() + "\"}");
+            }
+        }
+
+        // 5. Handle Deleting a Room (Checkout)
+        if (Method.POST.equals(method) && uri.equals("/room/delete")) {
+            try {
+                Integer contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
+                byte[] buffer = new byte[contentLength];
+                session.getInputStream().read(buffer, 0, contentLength);
+                String jsonBody = new String(buffer);
+
+                // Safely parse JSON
+                JsonObject requestData = gson.fromJson(jsonBody, JsonObject.class);
+                String roomIdToDelete = requestData.get("roomId").getAsString();
+
+                // Use the DatabaseHelper to delete the room
+                boolean success = dbHelper.deleteRoom(roomIdToDelete);
+
+                if (success) {
+                    Log.d("HTTP_TEST", "Successfully deleted room: " + roomIdToDelete);
+                    List<Room> allRooms = dbHelper.getAllRooms();
+                    Map<String, Object> payload = new HashMap<>();
+                    payload.put("action", "REFRESH_ALL");
+                    payload.put("data", allRooms);
+
+                    if (wsServer != null) {
+                        wsServer.broadcastUpdate(gson.toJson(payload));
+                    }
+                    return newFixedLengthResponse(Response.Status.OK, "application/json", "{\"message\":\"Success\"}");
+                } else {
+                    return newFixedLengthResponse(Response.Status.BAD_REQUEST, "application/json", "{\"message\":\"Failed to delete\"}");
+                }
+
+            } catch (Exception e) {
+                Log.e("HTTP_TEST", "Error deleting room", e);
                 return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "application/json", "{\"error\":\"" + e.getMessage() + "\"}");
             }
         }

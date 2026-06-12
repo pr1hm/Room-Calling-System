@@ -1,10 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ServerActivity">
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="32dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SERVER IS RUNNING"
+        android:textColor="#2E7D32"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Do not close this screen while in use."
+        android:textSize="16sp"
+        android:layout_marginBottom="48dp"/>
+
+    <Button
+        android:id="@+id/btnStopServer"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:backgroundTint="#D32F2F"
+        android:textColor="#FFFFFF"
+        android:text="STOP SERVERS &amp; EXIT"
+        android:textStyle="bold"/>
+
+</LinearLayout>

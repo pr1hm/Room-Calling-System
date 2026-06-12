@@ -21,6 +21,7 @@ public class RoomWebSocketServer extends WebSocketServer {
     // Now requires DatabaseHelper to fetch rooms
     public RoomWebSocketServer(DatabaseHelper dbHelper) {
         super(new InetSocketAddress(8090));
+        setReuseAddr(true);
         this.dbHelper = dbHelper;
         this.gson = new Gson();
     }

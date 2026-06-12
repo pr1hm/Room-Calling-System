@@ -81,6 +81,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return rooms;
     }
+
+
     // UPDATE room status
     public boolean updateStatus(String roomId, int status) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -93,6 +95,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int rows = db.update(TABLE_ROOMS, values, COL_ROOM_ID + "=?", new String[]{roomId});
 
         // If rows > 0, the update was successful
+        return rows > 0;
+    }
+    // GET single room by ID
+    public Room getRoomById(String roomId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_ROOMS, null, COL_ROOM_ID + "=?",
+                new String[]{roomId}, null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            Room room = new Room(
+                    cursor.getString(cursor.getColumnIndexOrThrow(COL_ROOM_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COL_ROOM_NAME)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COL_STATION_NAME)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COL_STATUS)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COL_LAST_UPDATED))
+            );
+            cursor.close();
+            return room;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+        return null; // Return null if the room doesn't exist
+    }
+    // DELETE a room
+    public boolean deleteRoom(String roomId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Deletes the row where the room_id matches the requested ID
+        int rows = db.delete(TABLE_ROOMS, COL_ROOM_ID + "=?", new String[]{roomId});
+
+        // Returns true if at least 1 row was successfully deleted
         return rows > 0;
     }
 }

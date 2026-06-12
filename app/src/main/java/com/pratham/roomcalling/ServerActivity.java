@@ -1,60 +1,40 @@
 package com.pratham.roomcalling;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
+import android.widget.Button;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import com.pratham.roomcalling.db.DatabaseHelper;
-import com.pratham.roomcalling.http.DashboardServer;
-import com.pratham.roomcalling.websocket.RoomWebSocketServer;
-import java.io.IOException;
+import com.pratham.roomcalling.service.ServerService;
 
 public class ServerActivity extends AppCompatActivity {
-
-    private DashboardServer dashboardServer;
-    private RoomWebSocketServer webSocketServer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_server);
 
-        // Seed the database
-        DatabaseHelper db = new DatabaseHelper(this);
-        db.addRoom("101", "Room 101 - Test Patient", "Ward A");
+        // UI Kill Switch
+        Button btnStopServer = findViewById(R.id.btnStopServer);
+        btnStopServer.setOnClickListener(v -> shutDownAndExit());
 
-        // Start WebSocket Server first
-        webSocketServer = new RoomWebSocketServer(db);
-        webSocketServer.start();
-        Log.d("WS_SERVER", "Attempting to start WebSocket Server on port 8090...");
-
-        // Start HTTP Server and pass the WebSocket server to it
-        dashboardServer = new DashboardServer(this, webSocketServer);
-        try {
-            dashboardServer.start();
-            Log.d("HTTP_TEST", "HTTP Server started on port 8080");
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e("HTTP_TEST", "Could not start HTTP server", e);
+        // Launch the Background Service
+        Intent serviceIntent = new Intent(this, ServerService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
+        } else {
+            startService(serviceIntent);
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    private void shutDownAndExit() {
+        Toast.makeText(this, "Shutting down Background Service...", Toast.LENGTH_SHORT).show();
 
-        // Always shut down servers to free up ports
-        if (dashboardServer != null) {
-            dashboardServer.stop();
-            Log.d("HTTP_TEST", "HTTP Server stopped");
-        }
+        // Stop the service
+        Intent serviceIntent = new Intent(this, ServerService.class);
+        stopService(serviceIntent);
 
-        if (webSocketServer != null) {
-            try {
-                webSocketServer.stop();
-                Log.d("WS_SERVER", "WebSocket Server stopped");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        finish();
     }
 }
