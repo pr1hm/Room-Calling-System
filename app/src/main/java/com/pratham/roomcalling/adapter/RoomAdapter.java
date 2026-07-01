@@ -8,8 +8,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.pratham.roomcalling.R;
 import com.pratham.roomcalling.model.Room;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,34 +35,39 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
     @Override
     public void onBindViewHolder(@NonNull RoomViewHolder holder, int position) {
         Room room = roomList.get(position);
-        holder.tvRoomName.setText(room.getRoomName());
-        holder.tvStationName.setText(room.getStationName());
 
-        // Color coding based on SRS Status Definitions
+        // Bind both texts
+        holder.tvRoomId.setText("Room: " + room.getRoomId());
+        holder.tvRoomName.setText(room.getRoomName());
+
+        // Color coding based on status
         switch (room.getStatus()) {
-            case 1: // Call
-                holder.tvStatus.setText("CALL");
-                holder.cardBackground.setBackgroundColor(Color.parseColor("#FFF59D")); // Yellow
-                break;
-            case 2: // Assistance
-                holder.tvStatus.setText("ASSISTANCE");
-                holder.cardBackground.setBackgroundColor(Color.parseColor("#FFCC80")); // Orange
+            case 4: // Emergency
+                holder.cardBackground.setBackgroundColor(Color.parseColor("#EF4444")); // Red
+                holder.tvStatus.setText("CODE BLUE / EMERGENCY");
+                holder.setTextColor(Color.WHITE);
                 break;
             case 3: // Care Required
+                holder.cardBackground.setBackgroundColor(Color.parseColor("#F97316")); // Orange
                 holder.tvStatus.setText("CARE REQUIRED");
-                holder.cardBackground.setBackgroundColor(Color.parseColor("#EF9A9A")); // Red-Orange
+                holder.setTextColor(Color.WHITE);
                 break;
-            case 4: // Emergency
-                holder.tvStatus.setText("EMERGENCY - CODE BLUE");
-                holder.tvStatus.setTextColor(Color.WHITE);
-                holder.tvRoomName.setTextColor(Color.WHITE);
-                holder.cardBackground.setBackgroundColor(Color.parseColor("#B71C1C")); // Dark Red
+            case 2: // Assistance
+                holder.cardBackground.setBackgroundColor(Color.parseColor("#EAB308")); // Yellow
+                holder.tvStatus.setText("ASSISTANCE");
+                holder.setTextColor(Color.BLACK);
                 break;
-            default: // 0 = Idle
-                holder.tvStatus.setText("IDLE");
-                holder.tvStatus.setTextColor(Color.BLACK);
-                holder.tvRoomName.setTextColor(Color.BLACK);
+            case 1: // Standard Call
+                holder.cardBackground.setBackgroundColor(Color.parseColor("#3B82F6")); // Blue
+                holder.tvStatus.setText("NURSE CALL");
+                holder.setTextColor(Color.WHITE);
+                break;
+            case 0: // Idle
+            default:
                 holder.cardBackground.setBackgroundColor(Color.WHITE);
+                holder.tvStatus.setText("IDLE");
+                holder.setTextColor(Color.parseColor("#1E293B"));
+                holder.tvRoomId.setTextColor(Color.parseColor("#64748B")); // Reset subtitle color
                 break;
         }
     }
@@ -70,16 +77,27 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         return roomList.size();
     }
 
-    static class RoomViewHolder extends RecyclerView.ViewHolder {
-        TextView tvRoomName, tvStationName, tvStatus;
+    class RoomViewHolder extends RecyclerView.ViewHolder {
+        TextView tvRoomId, tvRoomName, tvStatus;
         LinearLayout cardBackground;
 
         public RoomViewHolder(@NonNull View itemView) {
             super(itemView);
+            tvRoomId = itemView.findViewById(R.id.tvRoomId);
             tvRoomName = itemView.findViewById(R.id.tvRoomName);
-            tvStationName = itemView.findViewById(R.id.tvStationName);
             tvStatus = itemView.findViewById(R.id.tvStatus);
             cardBackground = itemView.findViewById(R.id.cardBackground);
+        }
+
+        public void setTextColor(int color) {
+            tvRoomName.setTextColor(color);
+            tvStatus.setTextColor(color);
+            // If the background is a dark color (White text), make the Room ID semi-transparent white
+            if (color == Color.WHITE) {
+                tvRoomId.setTextColor(Color.parseColor("#E2E8F0"));
+            } else {
+                tvRoomId.setTextColor(Color.parseColor("#64748B"));
+            }
         }
     }
 }

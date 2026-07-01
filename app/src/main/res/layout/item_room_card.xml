@@ -16,22 +16,22 @@
         android:background="#FFFFFF">
 
         <TextView
+            android:id="@+id/tvRoomId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Room: 101"
+            android:textSize="14sp"
+            android:textColor="#64748B"
+            android:textStyle="bold"/>
+
+        <TextView
             android:id="@+id/tvRoomName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Room 101"
+            android:text="Patient Name"
             android:textSize="26sp"
             android:textStyle="bold"
-            android:textColor="#1E293B"/>
-
-        <TextView
-            android:id="@+id/tvStationName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ward A"
-            android:textSize="14sp"
-            android:textColor="#64748B"
-            android:textStyle="bold"
+            android:textColor="#1E293B"
             android:layout_marginTop="2dp"/>
 
         <View

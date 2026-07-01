@@ -1,67 +1,112 @@
 package com.pratham.roomcalling.util;
 
 import android.content.Context;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
+import android.media.MediaPlayer;
+
+import com.pratham.roomcalling.R;
 import com.pratham.roomcalling.model.Room;
+
 import java.util.List;
 
 public class RoomAudioManager {
-    private Ringtone currentRingtone;
-    private final Context context;
-    private int currentPlayingPriority = 0;
+
+    private Context context;
+    private MediaPlayer mediaPlayer;
+    private int currentPlayingStatus = 0;
+    private int playCount = 0;
+
+    // Default settings injected by the Activity
+    private boolean isSoundEnabled = true;
+    private int maxRepeats = 1;
+    private boolean isAlarmCompleted = false;
 
     public RoomAudioManager(Context context) {
         this.context = context;
     }
 
-    public void evaluateAndPlay(List<Room> rooms) {
-        int highestPriority = 0;
+    // NEW: The Activity will pass the settings here
+    public void updateSettings(boolean isEnabled, int repeats) {
+        this.isSoundEnabled = isEnabled;
+        this.maxRepeats = repeats;
 
-        // 1. Find the highest active status across all rooms
+        // Instantly kill sound if admin toggles it OFF while playing
+        if (!isEnabled && mediaPlayer != null && mediaPlayer.isPlaying()) {
+            stopInnerAudio();
+        }
+    }
+
+    public void evaluateAndPlay(List<Room> rooms) {
+        int highestStatus = 0;
         for (Room room : rooms) {
-            if (room.getStatus() > highestPriority) {
-                highestPriority = room.getStatus();
+            if (room.getStatus() > highestStatus) {
+                highestStatus = room.getStatus();
             }
         }
 
-        // 2. If the emergency level hasn't changed, keep doing what we are doing
-        if (highestPriority == currentPlayingPriority) {
+        if (highestStatus == 0) {
+            stopAudio();
             return;
         }
 
-        // 3. Status changed! Stop the old sound.
-        stopAudio();
-        currentPlayingPriority = highestPriority;
+        // Only play if it's a new emergency, OR if it's a higher priority emergency
+        if (highestStatus != currentPlayingStatus) {
+            isAlarmCompleted = false; // Reset completion flag
+            playCustomSound(highestStatus);
+        }
+    }
 
-        // 4. If everything is Idle (0), stay silent and exit.
-        if (highestPriority == 0) {
+    private void playCustomSound(int status) {
+        stopInnerAudio();
+
+        if (!isSoundEnabled) {
+            currentPlayingStatus = status; // Acknowledge silently
             return;
         }
 
-        // 5. Pick the right sound based on the emergency level
-        Uri soundUri = null;
-        if (highestPriority == 4 || highestPriority == 3) {
-            // Emergency (4) or Care Required (3) -> Play loud system ALARM
-            soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        } else if (highestPriority == 2 || highestPriority == 1) {
-            // Assistance (2) or Call (1) -> Play short system NOTIFICATION
-            soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        int soundResource;
+        switch (status) {
+            case 4: soundResource = R.raw.emergency_code_blue; break;
+            case 3: soundResource = R.raw.care_required; break;
+            case 2: soundResource = R.raw.assistance_needed; break;
+            case 1: default: soundResource = R.raw.standard_call; break;
         }
 
-        // 6. Play the new sound
-        if (soundUri != null) {
-            currentRingtone = RingtoneManager.getRingtone(context, soundUri);
-            if (currentRingtone != null) {
-                currentRingtone.play();
+        mediaPlayer = MediaPlayer.create(context, soundResource);
+        if (mediaPlayer != null) {
+            playCount = 1;
+            currentPlayingStatus = status;
+
+            if (maxRepeats == 0) {
+                // Native infinite looping is perfectly stable
+                mediaPlayer.setLooping(true);
+                mediaPlayer.start();
+            } else {
+                mediaPlayer.start();
+                mediaPlayer.setOnCompletionListener(mp -> {
+                    if (playCount < maxRepeats) {
+                        playCount++;
+                        mp.start();
+                    } else {
+                        isAlarmCompleted = true; // Mark as finished
+                        stopInnerAudio();
+                    }
+                });
             }
         }
     }
 
-    public void stopAudio() {
-        if (currentRingtone != null && currentRingtone.isPlaying()) {
-            currentRingtone.stop();
+    private void stopInnerAudio() {
+        if (mediaPlayer != null) {
+            if (mediaPlayer.isPlaying()) mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
         }
+    }
+
+    public void stopAudio() {
+        stopInnerAudio();
+        currentPlayingStatus = 0;
+        playCount = 0;
+        isAlarmCompleted = false;
     }
 }

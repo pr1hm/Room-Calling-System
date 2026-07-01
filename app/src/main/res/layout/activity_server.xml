@@ -2,37 +2,80 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical"
-    android:padding="32dp"
+    android:padding="20dp"
     android:background="#F8FAFC">
 
+    <!-- Header Section -->
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="System Active"
+        android:text="Server Active"
         android:textColor="#10B981"
         android:textSize="28sp"
         android:textStyle="bold"
-        android:layout_marginBottom="8dp"/>
+        android:textAlignment="center"/>
 
+    <TextView
+        android:id="@+id/tvIpAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Fetching IP..."
+        android:textColor="#1E293B"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Action Buttons (Side by Side) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/btnOpenDashboard"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:backgroundTint="#0F172A"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:text="API Dashboard"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/btnStopServer"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:backgroundTint="#EF4444"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:text="Stop Server"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#E2E8F0"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- NEW: Live Monitor Section -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Background services are running.\nDo not close this screen while in use."
-        android:textColor="#64748B"
-        android:textSize="16sp"
-        android:layout_marginBottom="48dp"
-        android:textAlignment="center"/>
+        android:text="Local Live Monitor"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#1E293B"
+        android:layout_marginBottom="8dp"/>
 
-    <Button
-        android:id="@+id/btnStopServer"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewRooms"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:backgroundTint="#EF4444"
-        android:textColor="#FFFFFF"
-        android:text="STOP SERVERS &amp; EXIT"
-        android:textSize="16sp"
-        android:textStyle="bold"/>
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
 </LinearLayout>
